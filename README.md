@@ -1,6 +1,6 @@
 <h1 align="center">Model Building</h1>
 
-<p align="center"><b><i>Created by <a href="https://github.com/TJNanugonda> TJ Nanugonda </a>> for Carolina Analytics and Data Science on 2/22/2023</b></i></p>
+<p align="center"><b><i>Created by <a href="https://github.com/TJNanugonda"> TJ Nanugonda </a><i> for Carolina Analytics and Data Science on 2/22/2023</b></i></p>
 
  
 As most know, the NCAA Mens Basketball Tournament, or March Madness, is a single-elimination tournament with 68 teams where favorites tend to always fall. There has never been a perfect bracket of predicting the tournament, but lets try and be the first! Meet us on Wednesday where using model building techniques in R, we will create models using a variety of datasets to try and predict the craziness of March.
