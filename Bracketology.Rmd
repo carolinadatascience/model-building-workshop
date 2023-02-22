@@ -1,0 +1,93 @@
+---
+title: "Bracketology"
+output: html_document
+date: "2023-02-22"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#First Lets Get KenPom Data 
+
+
+```{r}
+rm(list=ls())
+library(XML)
+library(rvest)
+library(stringr)
+library(dplyr)
+
+getKenPomYearData <- function(year)
+{
+    theUrl <- paste0("https://kenpom.com/index.php?y=", as.character(year))
+    page <- read_html(theUrl)
+    tables <- page %>% html_nodes("table") %>% html_table()
+    data <- as.data.frame(tables[1])
+
+    colnames(data) <- c("Rank", "Team", "Conf", "Record", "AdjEM", "AdjO", 
+         "AdjO_R", "AdjD", "AdjD_R", "AdjT", "AdjT_R",
+         "Luck", "Luck_R", "SoS_AdjEM", "SoS_AdjEM_R", 
+         "OppO", "OppO_R", "OppD", "OppD_R", "NC_AdjEM", "NC_AdjEM_R")
+
+    data <- data %>% filter(!str_detect(Rank, "Rk")) # Remove label row
+
+    data <- data %>% filter(nchar(as.character(Rank)) > 0) # Remove empty rank rows.
+    data$Year = year
+
+    return(data)
+}
+
+kenPomData <- data.frame()
+inputPath <- "2022Data\\" # Location for storing the data to be used as an input to the ML work.
+
+# For training purposes, get all data before the current year. Aggregate into a single data frame.
+for (year in 2002:2021)
+{
+    kenPomYear <- getKenPomYearData(year)
+    kenPomData <- rbind(kenPomData, kenPomYear)
+}
+
+write.csv(kenPomData, paste0(inputPath, "KenPomDataRaw.csv"), row.names=F)
+
+# For the features needed for predicting the current year, get just the current year's data.
+kenPom2022 <- getKenPomYearData(2022)
+write.csv(kenPom2022, paste0(inputPath, "KenPomDataRaw2022.csv"), row.names=F)
+
+
+```
+
+#Obtain
+```{r}
+
+MMPastData <- read_csv("Downloads/March-Madness-Project-main/Big_Dance_CSV.csv")
+
+MMPastData <- MMPastData %>% filter(Year >= 2002)
+
+colnames(MMPastData)
+
+colnames(MMPastData)[5] = "Seed 1"
+colnames(MMPastData)[6] = "Score 1"
+colnames(MMPastData)[7] = "Team 1"
+colnames(MMPastData)[8] = "Team 2"
+colnames(MMPastData)[9] = "Score 2"
+colnames(MMPastData)[10] = "Seed 2"
+
+kenPomData$Team <- gsub("[[:digit:]]", "", kenPomData$Team)  # Extract seed numbers
+
+kenPomData$Team <- gsub("St.", "St", kenPomData$Team)  # Change States
+
+kenPomData$Team <- gsub("'", "", kenPomData$Team)  # Change All Apostrophes
+```
+
+#Inner Joins
+```{r}
+mm_data1 = inner_join(MMPastData, kenPomData, by = c('Team 1' = 'Team', 'Year'))
+colnames(mm_data1)
+
+mm_data1 = rename(mm_data1, 'Rank 1' = 'Rank', 'Conf1' = 'Conf', 'Record1' = 'Record', 'AdjEM1' = 'AdjEM', 'AdjO1' = 'AdjO', 
+                   'AdjO_R1' = 'AdjO_R', 'AdjD1' = 'AdjD', 'AdjD_R1' = 'AdjD_R', 'AdjT1' = 'AdjT', 'AdjT_R1' = 'AdjT_R', 'Luck1' = 'Luck', 'Luck_R1' = 'Luck_R', 'SoS_AdjEM1' = 'SoS_AdjEM', 'SoS_AdjEM_R1' = 'SoS_AdjEM_R', 'OppO1' = 'OppO', 'OppO_R1' = 'OppO_R', 'OppD1' = 'OppD', 'OppD_R1' = 'OppD_R', 'NC_AdjEM1' = 'NC_AdjEM', 'NC_AdjEM_R1' = 'NC_AdjEM_R' )
+
+mm_final = inner_join(mm_data1, kenPomData, by = c('Team 2' = 'Team', 'Year'))
+```
+
