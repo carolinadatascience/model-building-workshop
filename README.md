@@ -1,4 +1,4 @@
-<h1 align="center">Workshop Name</h1>
+<h1 align="center">Model Building</h1>
 
 <p align="center"><b><i>Created by @<your_github_username_here!!> for Carolina Analytics and Data Science on 2/22/2023</b></i></p>
 
